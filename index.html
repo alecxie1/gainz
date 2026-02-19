@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAINZ</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="GAINZ">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:   #0d0d0d;
+  --paper: #f4f1ec;
+  --mid:   #e6e2db;
+  --rule:  #cac5bc;
+  --dim:   #887f74;
+  --hit:   #d6f0c8;
+  --warn:  #fef3c2;
+  --miss:  #fde4e4;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: 80px;
+  background-size: 20px 20px;
+  background-attachment: fixed;
+}
+
+button, input, select { font-family: inherit; cursor: pointer; -webkit-appearance: none; appearance: none; }
+
+.lbl {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 10px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--dim);
+}
+
+/* ── Header ── */
+#header {
+  background: var(--ink); color: var(--paper);
+  padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 10;
+}
+#app-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 26px; letter-spacing: 8px; }
+#app-date  { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--rule); margin-top: 1px; }
+#config-btn { background: none; border: 1px solid #555; color: var(--paper); padding: 5px 12px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; }
+
+/* ── Progress ── */
+#progress { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--rule); }
+.prog-card { padding: 14px 20px; border-right: 1px solid var(--rule); background: #fff; }
+.prog-card:last-child { border-right: none; }
+.prog-val { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 28px; line-height: 1; margin-top: 3px; }
+.prog-val span { font-weight: 400; font-size: 13px; color: var(--dim); }
+.prog-bar-bg { margin-top: 8px; height: 2px; background: var(--mid); }
+.prog-bar-fill { height: 100%; background: var(--ink); transition: width 0.5s; }
+.prog-pct { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 1px; color: var(--dim); margin-top: 3px; }
+
+/* ── Tabs ── */
+#tabs { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; border-bottom: 2px solid var(--ink); background: #fff; }
+.tab-btn { padding: 11px 0; border: none; border-right: 1px solid var(--rule); background: #fff; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 1px; color: var(--dim); }
+.tab-btn:last-child { border-right: none; }
+.tab-btn.active { background: var(--ink); color: var(--paper); }
+
+/* ── Info bar ── */
+.info-bar { padding: 10px 20px; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 1px; border-bottom: 1px solid var(--rule); }
+
+/* ── Meal Slots ── */
+.slot { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--rule); background: #fff; }
+.slot.s-done   { background: var(--hit); }
+.slot.s-active { background: var(--warn); }
+.slot.s-missed { background: var(--miss); }
+.slot-meta { display: flex; align-items: baseline; gap: 10px; margin-bottom: 3px; flex-wrap: wrap; }
+.slot-time { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; }
+.slot-lbl  { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; color: var(--dim); }
+.slot-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 2px; padding: 1px 5px; border: 1px solid currentColor; }
+.slot-desc { font-size: 13px; line-height: 1.4; }
+.slot-hint { font-size: 11px; color: var(--dim); margin-top: 2px; }
+.slot-btn { border: 1px solid var(--ink); background: none; color: var(--ink); padding: 6px 13px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; margin-left: 12px; flex-shrink: 0; }
+.slot-btn.done { background: var(--ink); color: var(--paper); }
+
+/* ── Gym tab ── */
+.gym-hero { margin: 20px 20px 0; }
+.gym-day-card { background: #fff; border: 2px solid var(--ink); padding: 20px; text-align: center; margin-bottom: 14px; }
+.gym-day-type { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 36px; letter-spacing: 6px; line-height: 1; }
+.gym-day-sub  { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; color: var(--dim); margin-top: 4px; }
+.gym-hit-btn  { width: 100%; padding: 16px; background: var(--ink); color: var(--paper); border: none; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 4px; margin-bottom: 14px; }
+.gym-hit-btn.done { background: #2d6a4f; }
+.gym-override { display: flex; gap: 8px; margin-bottom: 20px; }
+.gym-override button { flex: 1; padding: 10px; background: none; border: 1px solid var(--rule); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; color: var(--dim); }
+.gym-override button.sel { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* ── Streak ── */
+.streak-bar { background: #fff; border: 1px solid var(--rule); padding: 14px 20px; margin: 0 20px 14px; display: flex; align-items: center; gap: 16px; }
+.streak-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 40px; line-height: 1; }
+.streak-dots { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+.streak-dot { width: 10px; height: 10px; border: 1px solid var(--rule); background: var(--mid); }
+.streak-dot.on { background: #2d6a4f; border-color: #2d6a4f; }
+.streak-dot.missed { background: #b91c1c; border-color: #b91c1c; }
+.streak-dot.today-off { border: 1px dashed var(--dim); background: none; }
+
+/* ── Log/Progress tab ── */
+.log-entry { background: #fff; border-bottom: 1px solid var(--rule); padding: 16px 20px; }
+.log-date { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 2px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.log-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; color: var(--ink); }
+.log-row span { color: var(--dim); font-size: 12px; }
+.log-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 2px; padding: 2px 7px; border: 1px solid; display: inline-block; }
+
+/* ── Weight ── */
+.weight-input-row { display: flex; margin: 14px 20px 0; }
+.weight-input-row input { flex: 1; background: #fff; border: 1px solid var(--ink); border-right: none; color: var(--ink); padding: 11px 14px; font-size: 14px; outline: none; }
+.weight-input-row input::placeholder { color: var(--dim); }
+.weight-input-row button { background: var(--ink); color: var(--paper); border: none; padding: 11px 20px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 2px; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; margin: 14px 20px 0; border: 1px solid var(--rule); }
+.stat-cell { padding: 12px 14px; border-right: 1px solid var(--rule); background: #fff; }
+.stat-cell:last-child { border-right: none; }
+.stat-val  { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 22px; line-height: 1; margin-top: 3px; }
+.stat-unit { font-size: 11px; color: var(--dim); font-weight: 400; }
+.chart-wrap { margin: 14px 20px 0; padding: 14px; background: #fff; border: 1px solid var(--rule); }
+.weight-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 20px; border-bottom: 1px solid var(--rule); background: #fff; font-size: 13px; }
+.sec-label  { padding: 12px 20px 4px; border-top: 1px solid var(--rule); }
+
+/* ── Buttons ── */
+.btn-primary { display: block; width: calc(100% - 40px); margin: 14px 20px 0; padding: 13px; background: var(--ink); color: var(--paper); border: none; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; }
+.btn-outline  { display: block; width: calc(100% - 40px); margin: 10px 20px 0; padding: 11px; background: none; color: var(--ink); border: 1px solid var(--rule); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 2px; }
+.empty-state { padding: 40px 20px; text-align: center; color: var(--dim); font-family: 'Barlow Condensed', sans-serif; font-size: 14px; letter-spacing: 1px; line-height: 2.2; }
+
+/* ── Modals ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(13,13,13,0.55); display: flex; align-items: flex-end; z-index: 100; }
+.modal-box { background: var(--paper); width: 100%; max-width: 480px; margin: 0 auto; border-top: 3px solid var(--ink); padding: 24px 24px 36px; max-height: 85vh; overflow-y: auto; }
+.modal-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: 4px; margin-bottom: 4px; }
+.modal-hint  { font-size: 12px; color: var(--dim); margin-bottom: 20px; line-height: 1.6; }
+.field-input { width: 100%; background: #fff; border: none; border-bottom: 1px solid var(--rule); color: var(--ink); padding: 10px 0; font-size: 15px; margin-bottom: 18px; outline: none; }
+.field-input:focus { border-bottom: 2px solid var(--ink); }
+.field-input::placeholder { color: var(--rule); }
+.btn-row    { display: flex; gap: 8px; margin-top: 8px; }
+.btn-cancel { flex: 1; padding: 13px; background: none; color: var(--dim); border: 1px solid var(--rule); font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 2px; }
+.btn-save   { flex: 2; padding: 13px; background: var(--ink); color: var(--paper); border: none; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; }
+
+/* ── Suggestion chips ── */
+.sug-chip { display: block; width: 100%; text-align: left; background: #fff; border: 1px solid var(--rule); border-left: 3px solid var(--ink); padding: 9px 12px; margin-bottom: 7px; }
+.sug-chip:active { background: var(--warn); }
+.sug-name   { font-size: 13px; color: var(--ink); display: block; margin-bottom: 2px; }
+/* ── Weekly summary grid ── */
+.week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 14px 20px 0; }
+.week-cell { background: #fff; border: 1px solid var(--rule); padding: 8px 4px 6px; text-align: center; }
+.week-cell.hit-cal { background: var(--hit); }
+.week-cell.danger  { background: var(--miss); }
+.week-cell.future  { background: var(--mid); opacity: 0.5; }
+.week-day  { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; letter-spacing: 1px; color: var(--dim); }
+.week-cal  { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; margin-top: 3px; }
+.week-gym  { font-size: 9px; margin-top: 2px; color: #2d6a4f; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; }
+.week-summary { margin: 10px 20px 0; background: #fff; border: 1px solid var(--rule); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+
+/* ── Danger zone ── */
+body.danger-zone #header { background: #7f1d1d; }
+body.danger-zone #progress { background: #fff0f0; }
+body.danger-zone .prog-bar-fill { background: #b91c1c; }
+
+.sug-macros { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 1px; color: var(--dim); }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <div id="app-title">GAINZ</div>
+    <div id="app-date"></div>
+  </div>
+  <button id="config-btn" onclick="openSettings()">CONFIG</button>
+</div>
+
+<div id="progress">
+  <div class="prog-card">
+    <div class="lbl">Calories</div>
+    <div class="prog-val" id="cal-val">0<span>/3000</span></div>
+    <div class="prog-bar-bg"><div class="prog-bar-fill" id="cal-bar" style="width:0%"></div></div>
+    <div class="prog-pct" id="cal-pct">0%</div>
+  </div>
+  <div class="prog-card">
+    <div class="lbl">Protein</div>
+    <div class="prog-val" id="prot-val">0<span>/150g</span></div>
+    <div class="prog-bar-bg"><div class="prog-bar-fill" id="prot-bar" style="width:0%"></div></div>
+    <div class="prog-pct" id="prot-pct">0%</div>
+  </div>
+</div>
+
+<!-- Dynamic status line — updated every minute by render() -->
+<div id="status-bar" style="padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:3px;border-bottom:1px solid var(--rule);background:#fff;transition:background 0.4s,color 0.4s"></div>
+
+<div id="tabs">
+  <button class="tab-btn active"   onclick="setTab('today')">TODAY</button>
+  <button class="tab-btn inactive" onclick="setTab('gym')">GYM</button>
+  <button class="tab-btn inactive" onclick="setTab('weight')">WEIGHT</button>
+  <button class="tab-btn inactive" onclick="setTab('log')">LOG</button>
+</div>
+
+<div id="tab-today"></div>
+<div id="tab-gym"    style="display:none"></div>
+<div id="tab-weight" style="display:none"></div>
+<div id="tab-log"    style="display:none"></div>
+
+<!-- Meal Modal -->
+<div id="meal-modal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title" id="meal-modal-title">LOG MEAL</div>
+    <div class="modal-hint"  id="meal-modal-hint"></div>
+    <div id="meal-suggestions" style="margin-bottom:18px;display:none">
+      <div class="lbl" style="margin-bottom:8px">Quick pick — tap to fill</div>
+      <div id="meal-suggestion-chips"></div>
+    </div>
+    <div class="lbl" style="margin-bottom:4px">What did you eat?</div>
+    <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:18px">
+      <input class="field-input" id="meal-name" type="text" placeholder="e.g. 2 ham & cheese hotpockets" style="margin-bottom:0;flex:1">
+      <button id="estimate-btn" onclick="estimateMacros()"
+        style="background:var(--ink);color:var(--paper);border:none;padding:8px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;flex-shrink:0;height:38px">
+        ESTIMATE
+      </button>
+    </div>
+    <div id="estimate-status" style="font-size:11px;color:var(--dim);margin-top:-12px;margin-bottom:14px;min-height:16px"></div>
+    <div class="lbl" style="margin-bottom:4px">Calories (kcal)</div>
+    <input class="field-input" id="meal-cal" type="number" placeholder="0">
+    <div class="lbl" style="margin-bottom:4px">Protein (g)</div>
+    <input class="field-input" id="meal-prot" type="number" placeholder="0">
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeMealModal()">CANCEL</button>
+      <button class="btn-save"   onclick="saveMeal()">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title">CONFIG</div>
+    <div class="modal-hint">Tweak your targets. Meal times are fixed to your schedule.</div>
+    <div class="lbl" style="margin-bottom:4px">OpenAI API Key (for food estimation)</div>
+    <input class="field-input" id="s-apikey" type="password" placeholder="sk-...">
+    <div style="font-size:11px;color:var(--dim);margin-top:-12px;margin-bottom:18px">Get yours at platform.openai.com → API keys</div>
+    <div class="lbl" style="margin-bottom:4px">Daily Calorie Target (kcal)</div>
+    <input class="field-input" id="s-cal" type="number">
+    <div class="lbl" style="margin-bottom:4px">Daily Protein Target (g)</div>
+    <input class="field-input" id="s-prot" type="number">
+    <div class="lbl" style="margin-bottom:4px">First gym day type (sets the alternation)</div>
+    <select class="field-input" id="s-firstday" style="background:transparent">
+      <option value="push">Push</option>
+      <option value="pull">Pull</option>
+    </select>
+    <div class="lbl" style="margin-bottom:4px">App start date (for alternation reference)</div>
+    <input class="field-input" id="s-startdate" type="date">
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeSettings()">CANCEL</button>
+      <button class="btn-save"   onclick="saveSettings()">SAVE</button>
+    </div>
+    <button class="btn-outline" onclick="exportData()" style="margin-top:16px">EXPORT ALL DATA</button>
+  </div>
+</div>
+
+<script>
+// ── Schedule ──────────────────────────────────────────────────────────────────
+const SCHEDULE = [
+  { id:1, time:'09:30', label:'Breakfast',    calTarget:500,  protTarget:20, hint:'e.g. 3 eggs + toast + juice', locked:false,
+    suggestions:[
+      { name:'3 scrambled eggs + 2 toast + OJ',        cal:480, prot:22 },
+      { name:'Greek yoghurt + granola + banana',        cal:450, prot:18 },
+      { name:'Oatmeal + peanut butter + honey + milk',  cal:520, prot:18 },
+      { name:'2 egg breakfast burrito + cheese',        cal:510, prot:24 },
+      { name:'Avocado toast x2 + 2 fried eggs',         cal:490, prot:20 },
+    ]},
+  { id:2, time:'12:30', label:'Lunch',         calTarget:700,  protTarget:30, hint:'e.g. rice + chicken + veggies', locked:false,
+    suggestions:[
+      { name:'200g chicken + 180g rice + veggies',      cal:690, prot:52 },
+      { name:'Chipotle burrito bowl (chicken)',          cal:700, prot:40 },
+      { name:'2 turkey + cheese sandwiches',            cal:680, prot:36 },
+      { name:'Pasta bolognese (300g pasta + beef)',      cal:720, prot:34 },
+      { name:'Salmon + rice + salad',                   cal:660, prot:45 },
+    ]},
+  { id:3, time:'17:30', label:'Pre-Gym Snack', calTarget:400,  protTarget:12, hint:'Light — banana + PB toast. Gym is at 6:20', locked:false,
+    suggestions:[
+      { name:'Banana + 2 tbsp peanut butter + toast',   cal:390, prot:12 },
+      { name:'Granola bar + apple + handful almonds',   cal:400, prot:10 },
+      { name:'Rice cakes x4 + peanut butter',           cal:380, prot:11 },
+      { name:'Dates x6 + mixed nuts 30g',               cal:410, prot:8  },
+      { name:'Bagel + cream cheese',                    cal:420, prot:12 },
+    ]},
+  { id:4, time:'20:00', label:'Post-Gym Meal', calTarget:400,  protTarget:10, hint:'e.g. pasta, rice, whatever sounds good', locked:false,
+    suggestions:[
+      { name:'Pasta + olive oil + parmesan',            cal:420, prot:14 },
+      { name:'White rice + teriyaki + edamame',         cal:390, prot:14 },
+      { name:'2 slices pizza (cheese)',                 cal:480, prot:18 },
+      { name:'Fried rice + egg',                        cal:410, prot:13 },
+      { name:'Ramen + egg + veggies',                   cal:380, prot:14 },
+    ]},
+  { id:5, time:'22:20', label:'Night Shake', calTarget:1000, protTarget:78,
+    hint:'Banana · oat milk · yoghurt · oats · olive oil · PB · 2x protein · creatine', locked:true, suggestions:[] },
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const DEFAULTS = { calories:3000, protein:150, firstDay:'push', startDate: todayKey(), apiKey:'' };
+let settings  = load('gz:s',  DEFAULTS);
+let dayLog    = load('gz:l',  {});   // { date: { slotId: {cal,prot,name} } }
+let gymLog    = load('gz:g2', {});   // { date: { hit: bool, type: 'push'|'pull', override: bool } }
+let weightLog = load('gz:w',  []);   // [ {date, weight} ]
+let activeMealSlot = null;
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+
+// todayKey returns local date as "YYYY-MM-DD" — NOT UTC.
+// The old version used toISOString() which is UTC, causing the date to flip at
+// 4 PM in LA (UTC-8). This version uses local year/month/day instead.
+function todayKey() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+// selectedDate drives what TODAY tab shows — starts as today, user can navigate
+let selectedDate    = todayKey();
+let selectedGymDate = todayKey();
+let selectedWgtDate = todayKey();
+
+function load(k,d)  { try { return JSON.parse(localStorage.getItem(k))||d; } catch { return d; } }
+function save(k,v)  { localStorage.setItem(k,JSON.stringify(v)); }
+function getNow()   { const d=new Date(); return d.getHours()*60+d.getMinutes(); }
+function toMins(t)  { const [h,m]=t.split(':').map(Number); return h*60+m; }
+function to12hr(t)  { const [h,m]=t.split(':').map(Number); const ap=h>=12?'PM':'AM'; const h12=h%12||12; return `${h12}:${String(m).padStart(2,'0')} ${ap}`; }
+function fmt(n)     { return Math.round(n||0).toLocaleString(); }
+function fmtDate(d) {
+  const [y,m,day] = d.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[parseInt(m)-1]} ${parseInt(day)}, ${y}`;
+}
+
+// Offset a date string by N days (+1 = tomorrow, -1 = yesterday)
+function offsetDate(dateStr, days) {
+  const d = new Date(dateStr + 'T00:00:00'); // force local midnight, not UTC
+  d.setDate(d.getDate() + days);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+// Navigate the TODAY tab to a different date
+function goToDate(dateStr) {
+  selectedDate = dateStr;
+  render();
+}
+
+function goToGymDate(dateStr) {
+  selectedGymDate = dateStr;
+  render();
+}
+
+function goToWgtDate(dateStr) {
+  selectedWgtDate = dateStr;
+  render();
+}
+
+// Schedule a re-render at exactly local midnight so the date flips automatically.
+// We calculate ms until next midnight and set a one-shot timeout.
+// After firing, it reschedules itself for the following midnight.
+function scheduleNextDay() {
+  const now  = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 0, 5); // 5s past midnight
+  const ms   = next - now;
+  setTimeout(() => {
+    selectedDate    = todayKey(); // snap back to today when day rolls over
+    selectedGymDate = todayKey();
+    selectedWgtDate = todayKey();
+    render();
+    scheduleNextDay();         // reschedule for next midnight
+  }, ms);
+}
+
+// ── Push/Pull logic ───────────────────────────────────────────────────────────
+// We calculate what day type a given date should be by counting gym days from
+// the start date and alternating. If the user overrides, we store that override.
+function getDayType(dateStr) {
+  const entry = gymLog[dateStr];
+  if (entry?.override) return entry.type; // user manually set it
+
+  // Count gym days between startDate and this date to determine alternation
+  const start   = new Date(settings.startDate || todayKey());
+  const current = new Date(dateStr);
+  const diffDays = Math.round((current - start) / 86400000);
+  const firstDay = settings.firstDay || 'push';
+
+  // Even offset = same as firstDay, odd = opposite
+  if (diffDays % 2 === 0) return firstDay;
+  return firstDay === 'push' ? 'pull' : 'push';
+}
+
+// ── Streak calculation ────────────────────────────────────────────────────────
+// Looks backwards from today through gymLog and counts consecutive hit days
+function calcStreak() {
+  let streak = 0;
+  const today = todayKey();
+  let d = new Date();
+
+  // Don't penalise today if not yet hit — start counting from yesterday
+  // unless today is already hit
+  if (!gymLog[today]?.hit) d.setDate(d.getDate() - 1);
+
+  while (true) {
+    const key = d.toISOString().slice(0,10);
+    if (gymLog[key]?.hit) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+// ── Week status ───────────────────────────────────────────────────────────────
+// Returns an object describing how this week is going.
+// "Week" = Mon through today. We look at cal hit rate and gym hit count.
+function getWeekData() {
+  const today = todayKey();
+  const days  = [];
+
+  // Build Mon–Sun of the current week
+  const d = new Date();
+  const dow = d.getDay(); // 0=Sun, 1=Mon...
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - ((dow + 6) % 7)); // always Mon
+
+  for (let i = 0; i < 7; i++) {
+    const dd  = new Date(monday);
+    dd.setDate(monday.getDate() + i);
+    const key = dd.toISOString().slice(0,10);
+    const meals = dayLog[key] || {};
+    const tc    = Object.values(meals).reduce((s,x)=>s+(x.cal||0), 0);
+    days.push({
+      key,
+      label: ['M','T','W','T','F','S','S'][i],
+      isFuture: key > today,
+      isToday:  key === today,
+      cal:      tc,
+      hitCal:   tc >= settings.calories * 0.9,
+      gymHit:   !!gymLog[key]?.hit,
+      gymType:  gymLog[key]?.type || '',
+    });
+  }
+
+  const past       = days.filter(d => !d.isFuture);
+  const calHitDays = past.filter(d => d.hitCal).length;
+  const gymDays    = past.filter(d => d.gymHit).length;
+  const totalCal   = past.reduce((s,d)=>s+d.cal, 0);
+  const weekTarget = settings.calories * 7;
+
+  return { days, calHitDays, gymDays, totalCal, weekTarget, pastCount: past.length };
+}
+
+// Calculates the status label and styling for the status bar
+// Called every minute from render()
+function getStatusConfig(tc, now) {
+  const today  = todayKey();
+  const gymHit = !!gymLog[today]?.hit;
+  const calPct = tc / settings.calories;
+  const isDanger = now >= 19*60 && calPct < 0.6;
+
+  // DANGER ZONE — after 7 PM and under 60% of total daily target
+  if (isDanger) {
+    return { text: `DANGER — ${fmt(settings.calories - tc)} KCAL SHORT`, bg: '#7f1d1d', color: '#fecaca', danger: true };
+  }
+
+  const { calHitDays, gymDays, pastCount } = getWeekData();
+  const gymTarget = Math.min(6, pastCount);
+  if (calHitDays === pastCount && gymDays >= gymTarget && pastCount >= 3) {
+    return { text: 'PERFECT WEEK', bg: '#052e16', color: '#86efac', danger: false };
+  }
+
+  // Calculate expected calories by now based on schedule.
+  // A slot "counts" once its start time + 30 min grace period has passed.
+  // We sum the calorie targets of all slots that should have been eaten by now.
+  const GRACE = 30; // minutes
+  const expectedCal = SCHEDULE.reduce((sum, s) => {
+    const slotMins = toMins(s.time);
+    if (now >= slotMins + GRACE) return sum + s.calTarget;
+    return sum;
+  }, 0);
+
+  // If no slots have passed yet (early morning before 10 AM), stay neutral
+  if (expectedCal === 0) {
+    return { text: gymHit ? 'ON TRACK — GYM DONE' : 'ON TRACK', bg: '#fff', color: 'var(--ink)', danger: false };
+  }
+
+  // ON TRACK / CRUSHING IT — compare eaten vs schedule expectation
+  if (tc >= expectedCal * 1.1) {
+    const ahead = fmt(tc - expectedCal);
+    const msg = gymHit ? `CRUSHING IT — ${ahead} KCAL AHEAD — GYM DONE` : `CRUSHING IT — ${ahead} KCAL AHEAD`;
+    return { text: msg, bg: '#052e16', color: '#86efac', danger: false };
+  }
+
+  if (tc >= expectedCal * 0.7) {
+    const msg = gymHit ? 'ON TRACK — GYM DONE' : 'ON TRACK';
+    return { text: msg, bg: '#fff', color: 'var(--ink)', danger: false };
+  }
+
+  const behind = fmt(expectedCal - tc);
+  return { text: `FALLING BEHIND — ${behind} KCAL SHORT`, bg: '#7c2d12', color: '#fed7aa', danger: false };
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  // Progress bars always reflect selectedDate
+  const e  = dayLog[selectedDate]||{};
+  const tc = Object.values(e).reduce((s,x)=>s+(x.cal||0),0);
+  const tp = Object.values(e).reduce((s,x)=>s+(x.prot||0),0);
+  const cp = Math.min(100,Math.round(tc/settings.calories*100));
+  const pp = Math.min(100,Math.round(tp/settings.protein*100));
+  document.getElementById('cal-val').innerHTML  = `${fmt(tc)}<span>/${fmt(settings.calories)}</span>`;
+  document.getElementById('prot-val').innerHTML = `${fmt(tp)}<span>/${fmt(settings.protein)}g</span>`;
+  document.getElementById('cal-bar').style.width  = cp+'%';
+  document.getElementById('prot-bar').style.width = pp+'%';
+  document.getElementById('cal-pct').textContent  = cp+'%';
+  document.getElementById('prot-pct').textContent = pp+'%';
+
+  // Status bar only makes sense for today
+  const isToday = selectedDate === todayKey();
+  const now     = getNow();
+  const sb      = document.getElementById('status-bar');
+  if (isToday) {
+    const status = getStatusConfig(tc, now);
+    sb.textContent       = status.text;
+    sb.style.background  = status.bg;
+    sb.style.color       = status.color;
+    sb.style.borderColor = status.danger ? '#991b1b' : 'var(--rule)';
+    document.body.classList.toggle('danger-zone', status.danger);
+  } else {
+    // Viewing a past day — show neutral label
+    sb.textContent      = `VIEWING ${fmtDate(selectedDate).toUpperCase()}`;
+    sb.style.background = '#fff';
+    sb.style.color      = 'var(--dim)';
+    sb.style.borderColor = 'var(--rule)';
+    document.body.classList.remove('danger-zone');
+  }
+
+  renderToday(); renderGym(); renderWeight(); renderLog();
+}
+
+// ── TODAY tab ─────────────────────────────────────────────────────────────────
+function renderToday() {
+  const now      = getNow();
+  const isToday  = selectedDate === todayKey();
+  const e        = dayLog[selectedDate]||{};
+  const tc       = Object.values(e).reduce((s,x)=>s+(x.cal||0),0);
+  const rem      = settings.calories - tc;
+  const prevDate = offsetDate(selectedDate, -1);
+  const nextDate = offsetDate(selectedDate, +1);
+  const canGoNext = selectedDate < todayKey(); // can't go past today
+
+  // Date navigation bar — prev arrow, date label, next arrow (disabled if today)
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:#fff;border-bottom:1px solid var(--rule)">
+      <button onclick="goToDate('${prevDate}')"
+        style="background:none;border:1px solid var(--rule);padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--ink)">
+        &larr;
+      </button>
+      <div style="text-align:center">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:2px">${fmtDate(selectedDate).toUpperCase()}</div>
+        ${!isToday ? `<div style="font-size:10px;font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;color:var(--dim);margin-top:1px">
+          <button onclick="goToDate('${todayKey()}')" style="background:none;border:none;color:#2d6a4f;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;padding:0">BACK TO TODAY</button>
+        </div>` : `<div style="font-size:10px;font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;color:var(--dim);margin-top:1px">TODAY</div>`}
+      </div>
+      <button onclick="${canGoNext?`goToDate('${nextDate}')`:'void(0)'}"
+        style="background:none;border:1px solid var(--rule);padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:${canGoNext?'var(--ink)':'var(--rule)'};cursor:${canGoNext?'pointer':'default'}">
+        &rarr;
+      </button>
+    </div>`;
+
+  // Calories remaining bar
+  html += rem > 0
+    ? `<div class="info-bar" style="background:var(--warn)"><strong>${fmt(rem)} kcal</strong> remaining</div>`
+    : `<div class="info-bar" style="background:var(--hit)">Target reached. Good work.</div>`;
+
+  SCHEDULE.forEach(s => {
+    const sm  = toMins(s.time);
+    const ent = e[s.id];
+
+    // Status logic: only show NOW/active state for today
+    let status = 'upcoming';
+    if (ent?.cal > 0)                                        status = 'done';
+    else if (isToday && now>=sm-15 && now<sm+60)             status = 'active';
+    else if ((isToday && now>=sm+60) || !isToday)            status = ent?.cal ? 'done' : 'missed';
+
+    // Don't mark future slots as missed on past days if nothing was logged
+    if (!isToday && !ent?.cal) status = 'missed';
+
+    let badges = '';
+    if (status==='active')              badges += `<span class="slot-badge" style="color:var(--ink)">NOW</span>`;
+    if (status==='missed'&&!ent?.cal)   badges += `<span class="slot-badge" style="color:#b91c1c">MISSED</span>`;
+    if (s.locked&&!ent?.cal)            badges += `<span class="slot-badge" style="color:var(--dim)">SHAKE</span>`;
+
+    const desc = ent?.cal
+      ? `<strong>${ent.name||s.label}</strong> &mdash; ${fmt(ent.cal)} kcal &middot; ${fmt(ent.prot)}g prot`
+      : `<span style="color:var(--dim)">Target: ${s.calTarget} kcal &middot; ${s.protTarget}g prot</span>`;
+
+    html += `
+      <div class="slot s-${status}">
+        <div style="flex:1;min-width:0">
+          <div class="slot-meta">
+            <span class="slot-time">${to12hr(s.time)}</span>
+            <span class="slot-lbl">${s.label.toUpperCase()}</span>
+            ${badges}
+          </div>
+          <div class="slot-desc">${desc}</div>
+          ${!ent?.cal?`<div class="slot-hint">${s.hint}</div>`:''}
+        </div>
+        <button class="slot-btn${ent?.cal?' done':''}" onclick="openMealModal(${s.id})">${ent?.cal?'EDIT':'LOG'}</button>
+      </div>`;
+  });
+  document.getElementById('tab-today').innerHTML = html;
+}
+
+// ── GYM tab ───────────────────────────────────────────────────────────────────
+function renderGym() {
+  const today      = todayKey();
+  const isToday    = selectedGymDate === today;
+  const entry      = gymLog[selectedGymDate] || {};
+  const dayType    = getDayType(selectedGymDate);
+  const isHit      = entry.hit || false;
+  const streak     = calcStreak();
+  const prevDate   = offsetDate(selectedGymDate, -1);
+  const nextDate   = offsetDate(selectedGymDate, +1);
+  const canGoNext  = selectedGymDate < today;
+
+  // Streak dots — last 14 days, always based on real today
+  let dots = '';
+  for (let i = 13; i >= 0; i--) {
+    const d   = new Date(); d.setDate(d.getDate() - i);
+    const y   = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+    const key = `${y}-${m}-${day}`;
+    if (key === today && !gymLog[today]?.hit) dots += `<div class="streak-dot today-off"></div>`;
+    else if (gymLog[key]?.hit)               dots += `<div class="streak-dot on"></div>`;
+    else                                     dots += `<div class="streak-dot missed"></div>`;
+  }
+
+  // Date nav bar — same pattern as TODAY tab
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:#fff;border-bottom:1px solid var(--rule)">
+      <button onclick="goToGymDate('${prevDate}')"
+        style="background:none;border:1px solid var(--rule);padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--ink)">
+        &larr;
+      </button>
+      <div style="text-align:center">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:2px">${fmtDate(selectedGymDate).toUpperCase()}</div>
+        ${!isToday
+          ? `<button onclick="goToGymDate('${today}')" style="background:none;border:none;color:#2d6a4f;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;padding:0;margin-top:1px">BACK TO TODAY</button>`
+          : `<div style="font-size:10px;font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;color:var(--dim);margin-top:1px">TODAY</div>`}
+      </div>
+      <button onclick="${canGoNext ? `goToGymDate('${nextDate}')` : 'void(0)'}"
+        style="background:none;border:1px solid var(--rule);padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:${canGoNext?'var(--ink)':'var(--rule)'};cursor:${canGoNext?'pointer':'default'}">
+        &rarr;
+      </button>
+    </div>
+
+    <div class="gym-hero">
+      <!-- Streak counter — always shows real streak regardless of selected date -->
+      <div class="streak-bar">
+        <div>
+          <div class="lbl">Gym Streak</div>
+          <div class="streak-num">${streak}</div>
+          <div class="lbl" style="margin-top:2px">${streak === 1 ? 'day' : 'days'}</div>
+        </div>
+        <div style="flex:1">
+          <div class="lbl" style="margin-bottom:6px">Last 14 days</div>
+          <div class="streak-dots">${dots}</div>
+        </div>
+      </div>
+
+      <!-- Day type card -->
+      <div class="gym-day-card">
+        <div class="lbl" style="margin-bottom:6px">${isToday ? 'Today is' : fmtDate(selectedGymDate) + ' was'}</div>
+        <div class="gym-day-type">${dayType.toUpperCase()}</div>
+        <div class="gym-day-sub">${dayType === 'push' ? 'Chest · Shoulders · Triceps' : 'Back · Biceps · Rear Delts'}</div>
+      </div>
+
+      <!-- Override buttons -->
+      <div class="lbl" style="margin-bottom:6px">Override day type</div>
+      <div class="gym-override">
+        <button class="${dayType==='push'?'sel':''}" onclick="overrideDay('push')">PUSH</button>
+        <button class="${dayType==='pull'?'sel':''}" onclick="overrideDay('pull')">PULL</button>
+      </div>
+
+      <!-- Log button -->
+      <button class="gym-hit-btn${isHit?' done':''}" onclick="toggleGym()">
+        ${isHit ? '✓ GYM DONE' + (isToday?' TODAY':' — '+fmtDate(selectedGymDate).toUpperCase()) : 'LOG GYM SESSION'}
+      </button>
+      ${isHit ? `<div class="info-bar" style="background:var(--hit);margin:0 0 14px">${dayType.toUpperCase()} day logged.</div>` : ''}
+    </div>
+
+    <div class="sec-label" style="margin-top:4px"><span class="lbl">Recent Sessions</span></div>`;
+
+  const past = Object.entries(gymLog)
+    .filter(([d,v]) => v.hit)
+    .sort((a,b) => b[0].localeCompare(a[0]))
+    .slice(0, 14);
+
+  if (!past.length) {
+    html += `<div class="empty-state">No sessions logged yet.</div>`;
+  } else {
+    past.forEach(([date, v]) => {
+      const isTodayRow    = date === today;
+      const isSelectedRow = date === selectedGymDate;
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 20px;border-bottom:1px solid var(--rule);background:${isSelectedRow?'var(--hit)':'#fff'}">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;color:var(--dim)">${fmtDate(date)}${isTodayRow?' · Today':''}</span>
+        <span class="log-badge" style="color:var(--ink);border-color:var(--rule)">${(v.type||'?').toUpperCase()}</span>
+      </div>`;
+    });
+  }
+
+  document.getElementById('tab-gym').innerHTML = html;
+}
+
+function toggleGym() {
+  const current = gymLog[selectedGymDate] || {};
+  const dayType = getDayType(selectedGymDate);
+  gymLog[selectedGymDate] = { ...current, hit: !current.hit, type: current.type || dayType };
+  save('gz:g2', gymLog);
+  render();
+}
+
+function overrideDay(type) {
+  gymLog[selectedGymDate] = { ...(gymLog[selectedGymDate]||{}), type, override: true };
+  save('gz:g2', gymLog);
+  render();
+}
+
+// ── WEIGHT tab ────────────────────────────────────────────────────────────────
+function renderWeight() {
+  const today     = todayKey();
+  const isToday   = selectedWgtDate === today;
+  const prevDate  = offsetDate(selectedWgtDate, -1);
+  const nextDate  = offsetDate(selectedWgtDate, +1);
+  const canGoNext = selectedWgtDate < today;
+  const existing  = weightLog.find(w => w.date === selectedWgtDate);
+
+  // Date nav bar
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:#fff;border-bottom:1px solid var(--rule)">
+      <button onclick="goToWgtDate('${prevDate}')"
+        style="background:none;border:1px solid var(--rule);padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--ink)">
+        &larr;
+      </button>
+      <div style="text-align:center">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:2px">${fmtDate(selectedWgtDate).toUpperCase()}</div>
+        ${!isToday
+          ? `<button onclick="goToWgtDate('${today}')" style="background:none;border:none;color:#2d6a4f;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;padding:0;margin-top:1px">BACK TO TODAY</button>`
+          : `<div style="font-size:10px;font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;color:var(--dim);margin-top:1px">TODAY</div>`}
+      </div>
+      <button onclick="${canGoNext ? `goToWgtDate('${nextDate}')` : 'void(0)'}"
+        style="background:none;border:1px solid var(--rule);padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:${canGoNext?'var(--ink)':'var(--rule)'};cursor:${canGoNext?'pointer':'default'}">
+        &rarr;
+      </button>
+    </div>`;
+
+  // Weight input — pre-fills if already logged for selected date
+  html += `<div class="weight-input-row">
+    <input id="weight-input" type="number" step="0.1" placeholder="${existing ? existing.weight : 'Weight in lb'}" value="${existing ? existing.weight : ''}">
+    <button onclick="logWeight()">${existing ? 'UPDATE' : 'LOG'}</button>
+  </div>`;
+
+  if (existing) {
+    html += `<div class="info-bar" style="background:var(--hit)">${fmtDate(selectedWgtDate)}: <strong>${existing.weight} lb</strong> logged. Edit above to update.</div>`;
+  }
+
+  if (!weightLog.length) {
+    html += `<div class="empty-state">No weigh-ins yet.<br>Weigh yourself every morning,<br>before eating or drinking.</div>`;
+  } else {
+    const sorted = [...weightLog].sort((a,b) => a.date.localeCompare(b.date));
+    const vals   = sorted.map(w => w.weight);
+    const first  = vals[0], latest = vals[vals.length-1];
+    const gained = (latest - first).toFixed(1);
+    const gc     = gained > 0 ? '#2d6a4f' : gained < 0 ? '#b91c1c' : 'var(--ink)';
+
+    html += `<div class="stat-grid">
+      <div class="stat-cell"><div class="lbl">Start</div><div class="stat-val">${first}<span class="stat-unit"> lb</span></div></div>
+      <div class="stat-cell"><div class="lbl">Now</div><div class="stat-val">${latest}<span class="stat-unit"> lb</span></div></div>
+      <div class="stat-cell"><div class="lbl">Gained</div><div class="stat-val" style="color:${gc}">${gained>0?'+':''}${gained}<span class="stat-unit"> lb</span></div></div>
+    </div>`;
+
+    if (vals.length > 1) {
+      const W=400, H=80, minV=Math.min(...vals)-1, maxV=Math.max(...vals)+1;
+      const pts  = vals.map((v,i)=>`${(i/(vals.length-1))*(W-20)+10},${H-((v-minV)/(maxV-minV))*(H-20)-10}`).join(' ');
+      const dots = vals.map((v,i)=>{ const x=(i/(vals.length-1))*(W-20)+10, y=H-((v-minV)/(maxV-minV))*(H-20)-10; return `<circle cx="${x}" cy="${y}" r="3" fill="var(--ink)"/>`; }).join('');
+      html += `<div class="chart-wrap">
+        <div class="lbl" style="margin-bottom:10px">Trend &mdash; goal +1 lb / week</div>
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:65px">
+          <polyline points="${pts}" fill="none" stroke="var(--ink)" stroke-width="1.5"/>${dots}
+        </svg>
+      </div>`;
+    }
+
+    html += `<div class="sec-label" style="margin-top:14px"><span class="lbl">History</span></div>`;
+    [...weightLog].sort((a,b) => b.date.localeCompare(a.date)).forEach((w, i, arr) => {
+      const prev     = arr[i+1];
+      const diff     = prev ? (w.weight - prev.weight).toFixed(1) : null;
+      const dc       = diff > 0 ? '#2d6a4f' : diff < 0 ? '#b91c1c' : 'var(--dim)';
+      const isSelRow = w.date === selectedWgtDate;
+      html += `<div class="weight-row" style="${isSelRow?'background:var(--warn)':''}">
+        <span style="color:var(--dim);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;font-size:12px">${fmtDate(w.date)}${w.date===today?' · Today':''}</span>
+        <span style="display:flex;gap:14px;align-items:center">
+          ${diff!==null?`<span style="color:${dc};font-size:12px;font-family:'Barlow Condensed',sans-serif">${diff>0?'+':''}${diff} lb</span>`:''}
+          <strong>${w.weight} lb</strong>
+        </span>
+      </div>`;
+    });
+  }
+
+  document.getElementById('tab-weight').innerHTML = html;
+}
+
+function logWeight() {
+  const w = parseFloat(document.getElementById('weight-input').value);
+  if (!w) return;
+  // If entry exists for selected date, update it; otherwise add new
+  const idx = weightLog.findIndex(e => e.date === selectedWgtDate);
+  if (idx >= 0) {
+    weightLog[idx].weight = w;
+  } else {
+    weightLog.push({ date: selectedWgtDate, weight: w });
+    // Keep sorted by date so chart and stats are always chronological
+    weightLog.sort((a,b) => a.date.localeCompare(b.date));
+  }
+  save('gz:w', weightLog);
+  render();
+}
+
+// ── LOG tab (daily progress history) ─────────────────────────────────────────
+function renderLog() {
+  const { days, calHitDays, gymDays, totalCal, weekTarget, pastCount } = getWeekData();
+  const weekPct = Math.min(100, Math.round(totalCal / weekTarget * 100));
+
+  // ── Weekly grid ──
+  let weekHtml = `<div style="padding:14px 20px 6px"><span class="lbl">This Week</span></div>`;
+
+  // 7 day tiles
+  weekHtml += `<div class="week-grid">`;
+  days.forEach(d => {
+    const cls = d.isFuture ? 'week-cell future' : d.hitCal ? 'week-cell hit-cal' : d.cal > 0 ? 'week-cell danger' : 'week-cell';
+    const calDisplay = d.isFuture ? '—' : d.cal > 0 ? `${Math.round(d.cal/100)/10}k` : '0';
+    const gymDisplay = d.gymHit ? (d.gymType ? d.gymType.slice(0,2).toUpperCase() : 'GYM') : '';
+    weekHtml += `<div class="${cls}${d.isToday?' today':''}">
+      <div class="week-day">${d.label}${d.isToday?'*':''}</div>
+      <div class="week-cal">${calDisplay}</div>
+      <div class="week-gym">${gymDisplay}</div>
+    </div>`;
+  });
+  weekHtml += `</div>`;
+
+  // Weekly totals bar
+  weekHtml += `<div class="week-summary">
+    <div>
+      <div class="lbl" style="margin-bottom:3px">Weekly Calories</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px">${fmt(totalCal)} <span style="font-weight:400;font-size:13px;color:var(--dim)">/ ${fmt(weekTarget)}</span></div>
+      <div style="margin-top:6px;height:2px;background:var(--mid);width:140px"><div style="height:100%;background:var(--ink);width:${weekPct}%"></div></div>
+    </div>
+    <div style="text-align:right">
+      <div class="lbl" style="margin-bottom:3px">Gym Days</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px">${gymDays}<span style="font-weight:400;font-size:13px;color:var(--dim)"> / 6</span></div>
+      <div class="lbl" style="margin-top:4px;color:${calHitDays===pastCount&&gymDays>=Math.min(6,pastCount)&&pastCount>=3?'#2d6a4f':'var(--dim)'}">${calHitDays===pastCount&&gymDays>=Math.min(6,pastCount)&&pastCount>=3?'PERFECT WEEK':''+calHitDays+'/'+pastCount+' cal days hit'}</div>
+    </div>
+  </div>
+  <div style="height:1px;background:var(--rule);margin:14px 0 0"></div>`;
+
+  // ── Daily history ──
+  const allDates = new Set([
+    ...Object.keys(dayLog),
+    ...Object.keys(gymLog).filter(d => gymLog[d]?.hit),
+    ...weightLog.map(w => w.date),
+  ]);
+  const sorted = [...allDates].sort((a,b) => b.localeCompare(a));
+
+  if (!sorted.length) {
+    document.getElementById('tab-log').innerHTML = weekHtml +
+      `<div class="empty-state">Nothing logged yet.<br>Start today and your history will appear here.</div>`;
+    return;
+  }
+
+  let html = weekHtml;
+  sorted.forEach(date => {
+    const meals   = dayLog[date] || {};
+    const gym     = gymLog[date] || {};
+    const wEntry  = weightLog.find(w => w.date === date);
+    const tc      = Object.values(meals).reduce((s,x)=>s+(x.cal||0), 0);
+    const tp      = Object.values(meals).reduce((s,x)=>s+(x.prot||0), 0);
+    const hitCal  = tc >= settings.calories * 0.9;
+    const hitProt = tp >= settings.protein  * 0.9;
+    const isToday = date === todayKey();
+
+    html += `<div class="log-entry">
+      <div class="log-date">
+        <span>${fmtDate(date)}${isToday?' <span style="font-size:11px;color:var(--dim)">· today</span>':''}</span>
+        ${gym.hit ? `<span class="log-badge" style="color:#2d6a4f;border-color:#2d6a4f">${(gym.type||'GYM').toUpperCase()}</span>` : ''}
+      </div>`;
+
+    if (tc > 0) {
+      html += `<div class="log-row">
+        <span>Calories</span>
+        <span style="color:${hitCal?'#2d6a4f':'var(--ink)'};font-weight:600">${fmt(tc)} <span>/ ${fmt(settings.calories)} kcal${hitCal?' ✓':''}</span></span>
+      </div>`;
+    } else {
+      html += `<div class="log-row"><span>Calories</span><span style="color:var(--rule)">not logged</span></div>`;
+    }
+
+    if (tp > 0) {
+      html += `<div class="log-row">
+        <span>Protein</span>
+        <span style="color:${hitProt?'#2d6a4f':'var(--ink)'};font-weight:600">${fmt(tp)}g${hitProt?' ✓':''}</span>
+      </div>`;
+    }
+
+    if (wEntry) {
+      html += `<div class="log-row"><span>Weight</span><span style="font-weight:600">${wEntry.weight} lb</span></div>`;
+    }
+
+    if (!gym.hit && date < todayKey()) {
+      html += `<div class="log-row"><span>Gym</span><span style="color:var(--rule)">not logged</span></div>`;
+    }
+
+    html += `</div>`;
+  });
+
+  document.getElementById('tab-log').innerHTML = html;
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function setTab(tab) {
+  ['today','gym','weight','log'].forEach(t => document.getElementById('tab-'+t).style.display = t===tab?'block':'none');
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.className = 'tab-btn ' + (['today','gym','weight','log'][i]===tab?'active':'inactive'));
+}
+
+// ── Meal modal ────────────────────────────────────────────────────────────────
+function openMealModal(id) {
+  activeMealSlot = id;
+  const s   = SCHEDULE.find(x=>x.id===id);
+  const ent = (dayLog[selectedDate]||{})[id];
+  document.getElementById('meal-modal-title').textContent = s.label.toUpperCase();
+  document.getElementById('meal-modal-hint').textContent  = s.hint;
+  document.getElementById('meal-name').value  = ent?.name  || (s.locked?s.label:'');
+  document.getElementById('meal-cal').value   = ent?.cal   || (s.locked?s.calTarget:'');
+  document.getElementById('meal-prot').value  = ent?.prot  || (s.locked?s.protTarget:'');
+  document.getElementById('meal-cal').placeholder  = s.calTarget;
+  document.getElementById('meal-prot').placeholder = s.protTarget;
+
+  const sugWrap  = document.getElementById('meal-suggestions');
+  const sugChips = document.getElementById('meal-suggestion-chips');
+  if (s.suggestions?.length && !ent?.cal) {
+    sugChips.innerHTML = s.suggestions.map((sg,i) =>
+      `<button class="sug-chip" onclick="fillSuggestion(${i})">
+        <span class="sug-name">${sg.name}</span>
+        <span class="sug-macros">${sg.cal} kcal &middot; ${sg.prot}g protein</span>
+      </button>`
+    ).join('');
+    sugWrap.style.display = 'block';
+  } else {
+    sugWrap.style.display = 'none';
+  }
+  document.getElementById('meal-modal').style.display='flex';
+}
+
+function fillSuggestion(i) {
+  const sg = SCHEDULE.find(x=>x.id===activeMealSlot).suggestions[i];
+  document.getElementById('meal-name').value  = sg.name;
+  document.getElementById('meal-cal').value   = sg.cal;
+  document.getElementById('meal-prot').value  = sg.prot;
+  document.getElementById('meal-suggestions').style.display = 'none';
+}
+
+function closeMealModal() { document.getElementById('meal-modal').style.display='none'; }
+
+function saveMeal() {
+  const cal  = parseInt(document.getElementById('meal-cal').value)||0;
+  const prot = parseInt(document.getElementById('meal-prot').value)||0;
+  const name = document.getElementById('meal-name').value||SCHEDULE.find(s=>s.id===activeMealSlot)?.label;
+  if (!cal&&!prot) { closeMealModal(); return; }
+  dayLog[selectedDate] = dayLog[selectedDate]||{};
+  dayLog[selectedDate][activeMealSlot] = {cal,prot,name};
+  save('gz:l',dayLog); closeMealModal(); render();
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+function openSettings() {
+  document.getElementById('s-apikey').value    = settings.apiKey || '';
+  document.getElementById('s-cal').value       = settings.calories;
+  document.getElementById('s-prot').value      = settings.protein;
+  document.getElementById('s-firstday').value  = settings.firstDay || 'push';
+  document.getElementById('s-startdate').value = settings.startDate || todayKey();
+  document.getElementById('settings-modal').style.display='flex';
+}
+function closeSettings() { document.getElementById('settings-modal').style.display='none'; }
+function saveSettings() {
+  settings = {
+    apiKey:    document.getElementById('s-apikey').value.trim(),
+    calories:  parseInt(document.getElementById('s-cal').value)||3000,
+    protein:   parseInt(document.getElementById('s-prot').value)||150,
+    firstDay:  document.getElementById('s-firstday').value,
+    startDate: document.getElementById('s-startdate').value,
+  };
+  save('gz:s',settings); closeSettings(); render();
+}
+
+// ── Food estimation via OpenAI ────────────────────────────────────────────────
+// OpenAI allows direct browser calls — no proxy needed.
+// Uses gpt-4o-mini: fast, cheap (~$0.0001 per lookup), accurate for food data.
+async function estimateMacros() {
+  const food   = document.getElementById('meal-name').value.trim();
+  const status = document.getElementById('estimate-status');
+  const btn    = document.getElementById('estimate-btn');
+
+  if (!food) {
+    status.textContent = 'Type what you ate first.';
+    status.style.color = '#b91c1c';
+    return;
+  }
+  if (!settings.apiKey) {
+    status.textContent = 'Add your OpenAI key in CONFIG first.';
+    status.style.color = '#b91c1c';
+    return;
+  }
+
+  btn.textContent    = '...';
+  btn.disabled       = true;
+  status.textContent = 'Estimating...';
+  status.style.color = 'var(--dim)';
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${settings.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        max_tokens: 60,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a nutrition estimator. Always respond with ONLY a JSON object like {"cal": 450, "prot": 28}. No explanation, no markdown, just raw JSON.'
+          },
+          {
+            role: 'user',
+            content: `Estimate total calories and protein grams for: "${food}"`
+          }
+        ]
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // OpenAI returns error details in data.error.message
+      throw new Error(data.error?.message || 'OpenAI error');
+    }
+
+    const text   = data.choices[0].message.content.trim();
+    const parsed = JSON.parse(text);
+
+    document.getElementById('meal-cal').value  = parsed.cal;
+    document.getElementById('meal-prot').value = parsed.prot;
+    status.textContent = 'Estimated — edit if needed.';
+    status.style.color = '#2d6a4f';
+
+  } catch (err) {
+    console.error('Estimate error:', err);
+    if (err.message.includes('401')) {
+      status.textContent = 'Invalid API key — check CONFIG.';
+    } else if (err.message.includes('429')) {
+      status.textContent = 'Rate limit hit — try again in a moment.';
+    } else {
+      status.textContent = 'Error: ' + err.message;
+    }
+    status.style.color = '#b91c1c';
+  } finally {
+    btn.textContent = 'ESTIMATE';
+    btn.disabled    = false;
+  }
+}
+
+// ── Export ────────────────────────────────────────────────────────────────────
+// Creates a JSON file of all your data and triggers a download
+// This is your backup — save it to iCloud or Notes
+function exportData() {
+  const data = { settings, dayLog, gymLog, weightLog, exported: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `gainz-export-${todayKey()}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+render();
+setTab('today');
+setInterval(render, 60000); // refresh every minute for status bar / NOW badge
+scheduleNextDay();           // auto-flip to next day at local midnight
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('GAINZ: sw ok'))
+      .catch(e => console.log('GAINZ: sw fail', e));
+  });
+}
+</script>
+</body>
+</html>
